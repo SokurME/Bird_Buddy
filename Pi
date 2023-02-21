@@ -1,7 +1,5 @@
 ping raspberrypi.local
 192.168.57.77
 
-ssh -X pi@192.168.57.77
+ssh -X pi@192.168.184.77
 pcmanfm
-
-ping raspberrypi.local
