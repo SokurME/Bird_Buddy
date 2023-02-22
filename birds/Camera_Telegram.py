@@ -1,9 +1,9 @@
 import cv2 # импорт модуля cv2
-import telebot # импорт модуля  для телеграмм канала
-bot = telebot.TeleBot('5866226591:AAFHoLsDmMU8siud04rxskTkZCPKllgydcY')
+import telepot # импорт модуля  для телеграмм канала
+bot = telepot.Bot('5866226591:AAFHoLsDmMU8siud04rxskTkZCPKllgydcY')
 CHANNEL_NAME = '@birds_794' # Адрес телеграм-канала
 #cv2.VideoCapture("видеофайл.mp4"); вывод кадров из видео файла
-cap = cv2.VideoCapture(0); # видео поток с веб камеры
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2); # видео поток с веб камеры
 
 cap.set(3,1280) # установка размера окна
 cap.set(4,700)
