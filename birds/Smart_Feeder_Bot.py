@@ -12,6 +12,7 @@ def convert_to_opencv(image):
     opencv_image = np.array([b, g, r]).transpose()
     return opencv_image
 
+
 def crop_center(img, cropx, cropy):
     h, w = img.shape[:2]
     startx = w // 2 - (cropx // 2)
@@ -64,7 +65,7 @@ def recognition():
         tf.import_graph_def(graph_def, name='')
 
     # Create a list of labels.
-    with open(labels_filename, 'rt') as lf:
+    with open(labels_filename, encoding='utf-8', mode='r') as lf:
         for l in lf:
             labels.append(l.strip())
 
@@ -110,7 +111,7 @@ def recognition():
             print("Verify this a model exported from an Object Detection project.")
             exit(-1)
 
-# Print the highest probability label
+        # Print the highest probability label
         highest_probability_index = np.argmax(predictions)
         # print('Classified as: ' + labels[highest_probability_index])
         # print()
@@ -128,30 +129,42 @@ def recognition():
 
 
 bot = telebot.TeleBot('6103061596:AAEeSIT1ssMSLanGhRZEVS0F48avzHuBWQU')
+bot.get_updates(allowed_updates=["channel_post"])
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, 'Привет! Готовы распознавать птиц?', parse_mode='html')
 
-
 @bot.message_handler(content_types=["text"])
 def get_user_text(message):
     if message.text == "Привет":
         bot.send_message(message.chat.id, "ХААААЙ! А теперь отправляй фото", parse_mode='html')
-    else:
-        bot.send_message(message.chat.id, "Напиши-ка лучше 'Привет', а ещё лучше отправь фото!", parse_mode='html')
-
 
 @bot.message_handler(content_types=["photo"])
 def get_user_photo(message):
-    raw = message.photo[2].file_id
+    raw = message.photo[-1].file_id
     name = "test.png"
     file_info = bot.get_file(raw)
     downloaded_file = bot.download_file(file_info.file_path)
     with open(name, 'wb') as new_file:
         new_file.write(downloaded_file)
-    bot.send_message(message.chat.id, recognition(), parse_mode='html')
+    result = recognition()
+    bot.send_message(message.chat.id, result, parse_mode='html')
+
+@bot.channel_post_handler(content_types=["photo"])
+def get_user_photo(message):
+    if message.chat.id != -1002112431587:
+        raw = message.photo[-1].file_id
+        name = "test.png"
+        file_info = bot.get_file(raw)
+        downloaded_file = bot.download_file(file_info.file_path)
+        with open(name, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        result = recognition()
+        bot.send_message(message.chat.id, "Не, ну мне лично кажется, что это " + result, parse_mode='html')
+        bot.send_photo("-1002112431587", open('test.png', 'rb'))
+        bot.send_message("-1002112431587", result, parse_mode='html')
 
 
 bot.polling(none_stop=True)
